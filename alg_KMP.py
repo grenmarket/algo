@@ -10,4 +10,14 @@ def prefix_table(s):
     return pref
 
 
-print(prefix_table("aaabaaaab"))
+def kmp(text, pattern):
+    k = 0
+    pt = prefix_table(pattern)
+    for n in range(0, len(text)):
+        while k > 0 and pattern[k] != text[n]:
+            k = pt[k-1]
+        if pattern[k] == text[n]:
+            k += 1
+        if k == len(pattern):
+            print(str(n - k))
+            k = pt[k-1]
