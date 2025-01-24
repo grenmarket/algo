@@ -1,47 +1,60 @@
-array = []
+class Heap:
+    
+    def __init__(self, isMin):
+        self.array = []
+        self.isMin = isMin
 
-def insert(a):
-    index = len(array)
-    array.append(a)
-    parent, parent_index = get_parent(index)
-    while parent is not None and parent > a:
-        array[parent_index], array[index] = array[index], array[parent_index]
-        index = parent_index
-        parent, parent_index = get_parent(index)
 
-def min():
-    if len(array) == 0:
-        return None
-    result = array[0]
-    last = len(array) - 1
-    array[0], array[last] = array[last], array[0]
-    del array[last]
-    bubble_down(0)
-    return result
-
-def bubble_down(index):
-    left = (index+1)*2 - 1
-    right = left+1
-    if left >= len(array):
-        return
-    if right >= len(array):
-        if array[left] < array[index]:
-            array[left], array[index] = array[index], array[left]
-            return
+    def comp(self, a1, a2):
+        if self.isMin:
+            return a1 < a2
         else:
+            return a1 > a2
+
+    def insert(self, a):
+        index = len(self.array)
+        self.array.append(a)
+        parent, parent_index = self.get_parent(index)
+        while parent is not None and self.comp(a, parent):
+            self.array[parent_index], self.array[index] = self.array[index], self.array[parent_index]
+            index = parent_index
+            parent, parent_index = self.get_parent(index)
+
+    def min_peek(self):
+        if len(self.array) == 0:
+            return None
+        return self.array[0]
+
+    def min(self):
+        if len(self.array) == 0:
+            return None
+        result = self.array[0]
+        last = len(self.array) - 1
+        self.array[0], self.array[last] = self.array[last], self.array[0]
+        del self.array[last]
+        self.bubble_down(0)
+        return result
+
+    def bubble_down(self, index):
+        left = (index + 1) * 2 - 1
+        right = left + 1
+        if left >= len(self.array):
             return
-    if array[left] < array[right]:
-        array[index], array[left] = array[left], array[index]
-        bubble_down(left)
-    else:
-        array[index], array[right] = array[right], array[index]
-        bubble_down(right)
+        if right >= len(self.array):
+            if self.comp(self.array[left], self.array[index]):
+                self.array[left], self.array[index] = self.array[index], self.array[left]
+                return
+            else:
+                return
+        if self.comp(self.array[left], self.array[right]):
+            self.array[index], self.array[left] = self.array[left], self.array[index]
+            self.bubble_down(left)
+        else:
+            self.array[index], self.array[right] = self.array[right], self.array[index]
+            self.bubble_down(right)
 
-
-def get_parent(index):
-    if index == 0:
-        return None, None
-    parent_index = (index-1) // 2
-    return array[parent_index], parent_index
-
-# todo: turn into a class, min/max parameter
+    def get_parent(self, index):
+        if index == 0:
+            return None, None
+        parent_index = (index - 1) // 2
+        return self.array[parent_index], parent_index
