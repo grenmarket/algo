@@ -3,6 +3,7 @@ class Heap:
     def __init__(self, isMin):
         self.array = []
         self.isMin = isMin
+        self.size = 0
 
 
     def comp(self, a1, a2):
@@ -19,6 +20,7 @@ class Heap:
             self.array[parent_index], self.array[index] = self.array[index], self.array[parent_index]
             index = parent_index
             parent, parent_index = self.get_parent(index)
+        self.size += 1
 
     def min_peek(self):
         if len(self.array) == 0:
@@ -33,6 +35,7 @@ class Heap:
         self.array[0], self.array[last] = self.array[last], self.array[0]
         del self.array[last]
         self.bubble_down(0)
+        self.size -= 1
         return result
 
     def bubble_down(self, index):
