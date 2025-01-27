@@ -7,24 +7,19 @@ class Heap:
     C = TypeVar('C', bound=int)
     ExtractorType = Callable[[T], C]
     
-    def __init__(self, isMin, key_extractor: ExtractorType):
+    def __init__(self, isMin: bool, key_extractor: ExtractorType):
         self.array = []
-        self.isMin = isMin
         self.size = 0
         self.key_extractor = key_extractor
+        self.compare = (lambda a, b: self.key_extractor(a) < self.key_extractor(b)) if isMin else (
+            lambda a, b: self.key_extractor(a) > self.key_extractor(b))
 
-
-    def comp(self, a1, a2):
-        if self.isMin:
-            return self.key_extractor(a1) < self.key_extractor(a2)
-        else:
-            return self.key_extractor(a1) > self.key_extractor(a2)
 
     def insert(self, a):
         index = len(self.array)
         self.array.append(a)
         parent, parent_index = self.get_parent(index)
-        while parent is not None and self.comp(a, parent):
+        while parent is not None and self.compare(a, parent):
             self.array[parent_index], self.array[index] = self.array[index], self.array[parent_index]
             index = parent_index
             parent, parent_index = self.get_parent(index)
@@ -52,12 +47,12 @@ class Heap:
         if left >= len(self.array):
             return
         if right >= len(self.array):
-            if self.comp(self.array[left], self.array[index]):
+            if self.compare(self.array[left], self.array[index]):
                 self.array[left], self.array[index] = self.array[index], self.array[left]
                 return
             else:
                 return
-        if self.comp(self.array[left], self.array[right]):
+        if self.compare(self.array[left], self.array[right]):
             self.array[index], self.array[left] = self.array[left], self.array[index]
             self.bubble_down(left)
         else:
