@@ -1,6 +1,8 @@
 import math
 from typing import Dict
 
+correct = [2599, 2610, 2947, 2052, 2367, 2399, 2029, 2442, 2505, 3068]
+
 def shortest_path(graph, start):
     visited = {start}
     distances = {start: 0}

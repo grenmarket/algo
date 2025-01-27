@@ -1,16 +1,24 @@
+from typing import Callable, TypeVar, Any
+
+
 class Heap:
+
+    T = TypeVar('T', bound=Any)
+    C = TypeVar('C', bound=int)
+    ExtractorType = Callable[[T], C]
     
-    def __init__(self, isMin):
+    def __init__(self, isMin, key_extractor: ExtractorType):
         self.array = []
         self.isMin = isMin
         self.size = 0
+        self.key_extractor = key_extractor
 
 
     def comp(self, a1, a2):
         if self.isMin:
-            return a1 < a2
+            return self.key_extractor(a1) < self.key_extractor(a2)
         else:
-            return a1 > a2
+            return self.key_extractor(a1) > self.key_extractor(a2)
 
     def insert(self, a):
         index = len(self.array)
