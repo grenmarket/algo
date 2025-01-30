@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict
 from datastructures import heap
+import sys
 
 class Node:
     def __init__(self, char, frequency):
@@ -39,13 +40,17 @@ def traverse(node, result, binary_string):
     return result
 
 
-frequency_map = {
-    'A': 51,
-    'B': 21,
-    'C': 11,
-    'D': 8,
-    'E': 5,
-    'F': 3,
-    'G': 1
-}
-print(encode(frequency_map))
+def init():
+    with open('files/huffman.txt', 'r') as file:
+        lines = [line for line in file]
+        frequency_map = {}
+        for i in range(1, len(lines)):
+            frequency_map[str(i)] = int(lines[i])
+        return frequency_map
+
+sys.setrecursionlimit(10**6)
+freq_map = init()
+encoded = encode(freq_map)
+min_enc = min(encoded, key=lambda enc: len(enc[1]))
+max_enc = max(encoded, key=lambda enc: len(enc[1]))
+print(min_enc, max_enc[1])
