@@ -1,3 +1,6 @@
+import sys
+
+
 def max_value(objects, total_weigth):
     results = [[0] * (len(objects)+1) for _ in range(total_weigth + 1)]
     for w in range(total_weigth + 1):
@@ -15,6 +18,24 @@ def max_value(objects, total_weigth):
     return max_weight, max_objects
 
 
+def max_value_recursive(objects, obj_index, total_weight, results):
+    if obj_index == -1:
+        return 0
+    key = (obj_index, total_weight)
+    if key in results:
+        return results[key]
+    repeat = max_value_recursive(objects, obj_index - 1, total_weight, results)
+    results[(obj_index-1, total_weight)] = repeat
+    curr_weight = objects[obj_index][1]
+    curr_value = objects[obj_index][0]
+    if curr_weight > total_weight:
+        return repeat
+    value_without = max_value_recursive(objects, obj_index-1, total_weight - curr_weight, results)
+    results[(obj_index-1, total_weight - curr_weight)] = value_without
+    alternative = curr_value + value_without
+    return max(repeat, alternative)
+
+
 def reconstruct_max(result, objects):
     i = -1
     w = -1
@@ -30,5 +51,13 @@ def reconstruct_max(result, objects):
         i -= 1
     return chosen_objects
 
-objects = [(3,4),(2,3),(4,2),(4,3)]
-print(max_value(objects, 6))
+def init():
+    with open('files/knapsack_big.txt', 'r') as file:
+        lines = [line.split() for line in file]
+        knapsack_size = int(lines[0][0])
+        objects = [(int(item[0]), int(item[1])) for item in lines[1:]]
+        return objects, knapsack_size
+
+sys.setrecursionlimit(10**6)
+objects, size = init()
+print(max_value_recursive(objects, len(objects) - 1, size, {}))
