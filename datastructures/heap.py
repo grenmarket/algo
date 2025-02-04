@@ -2,17 +2,18 @@ from typing import Callable, TypeVar, Any
 
 
 class Heap:
+
     T = TypeVar('T', bound=Any)
     C = TypeVar('C', bound=int)
     ExtractorType = Callable[[T], C]
-
+    
     def __init__(self, isMin: bool, key_extractor: ExtractorType):
         self.array = []
         self.size = 0
         self.key_extractor = key_extractor
         self.compare = (lambda a, b: self.key_extractor(a) < self.key_extractor(b)) if isMin else (
             lambda a, b: self.key_extractor(a) > self.key_extractor(b))
-        self.mapping = {}
+
 
     def insert(self, a):
         index = len(self.array)
@@ -23,18 +24,6 @@ class Heap:
             index = parent_index
             parent, parent_index = self.get_parent(index)
         self.size += 1
-        self.mapping[a] = index
-
-    def delete(self, a):
-        index = self.mapping.get(a)
-        if index is None:
-            return
-        last = len(self.array) - 1
-        self.swap(last, index)
-        del self.array[last]
-        self.bubble_down(index)
-        self.size -= 1
-        self.mapping.pop(a)
 
     def swap(self, a, b):
         self.array[b], self.array[a] = self.array[a], self.array[b]
@@ -53,7 +42,6 @@ class Heap:
         del self.array[last]
         self.bubble_down(0)
         self.size -= 1
-        self.mapping.pop(result)
         return result
 
     def bubble_down(self, index):
@@ -81,3 +69,5 @@ class Heap:
             return None, None
         parent_index = (index - 1) // 2
         return self.array[parent_index], parent_index
+
+
