@@ -1,16 +1,45 @@
 import math
 from typing import Dict
+from datastructures import heap
 
 correct = [2599, 2610, 2947, 2052, 2367, 2399, 2029, 2442, 2505, 3068]
 
 def shortest_path(graph, start):
     visited = {start}
     distances = {start: 0}
+    not_visited = initialize_not_visited(graph, start)
     while len(visited) < len(graph):
-        shortest, distance = get_shortest_edge(visited, distances, graph)
-        visited.add(shortest)
-        distances[shortest] = distance
+        min_vertex = not_visited.min()
+        v = min_vertex[0]
+        distance = min_vertex[1]
+        visited.add(v)
+        not_visited.delete(v)
+        distances[v] = distance
+        for edge in graph[v]:
+            dest = edge[0]
+            cost = edge[1] + distance
+            if dest not in visited:
+                vertex_key = not_visited.get_value(dest)
+                new_key = min(vertex_key, cost)
+                not_visited.delete(dest)
+                not_visited.insert((dest, new_key))
     return distances
+
+
+def initialize_not_visited(graph, start):
+    to_add = set()
+    for v in graph:
+        for e in graph[v]:
+            to_add.add(e[0])
+    to_add.remove(start)
+    not_visited = heap.Heap(True, lambda obj: obj[1], lambda obj: obj[0])
+    for edge in graph[start]:
+        to_add.remove(edge[0])
+        not_visited.insert((edge[0], edge[1]))
+    for vertex in to_add:
+        not_visited.insert((vertex, math.inf))
+    return not_visited
+
 
 def get_shortest_edge(visited, distances, graph: Dict):
     min = math.inf
