@@ -32,6 +32,8 @@ def is_already_optimal(A, i, graph):
 
 
 def min_with_one_less_edge(A, i, v, edge_map):
+    if v not in edge_map:
+        return math.inf
     candidates = []
     for edge in edge_map[v]:
         candidates.append(A[(i-1, edge[0])] + edge[1])
