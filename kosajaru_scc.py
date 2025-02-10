@@ -2,85 +2,109 @@ import sys
 from collections import defaultdict, Counter
 
 
-def kosajaru():
-    graph, rev_graph, max = init()
-    initialize_global(max)
-    dfs_loop_rev(rev_graph, max)
-    global explored
-    explored = [False for i in range(max+1)]
-    dfs_loop(graph, max)
-    print(frequency_map(leaders, 10))
+class Execution:
+
+    def __init__(self, max_v):
+        self.max_v = max_v
+        self.explored = [False for i in range(max_v + 1)]
+        self.f_time = {}
+        self.leaders = [None for i in range(max_v + 1)]
+        self.t = 0
+        self.s = None
 
 
-def initialize_global(max):
-    global explored
-    explored = [False for i in range(max + 1)]
-    global f_time
-    f_time = {}
-    global leaders
-    leaders = [None for i in range(max + 1)]
-    global t
-    t = 0
-    global s
+    def init_from(self, execution):
+        self.max_v = execution.max_v
+        self.explored = [False for i in range(execution.max_v + 1)]
+        self.f_time = execution.f_time
+        self.leaders = [None for i in range(execution.max_v + 1)]
+        self.t = 0
+        self.s = None
+        return self
 
 
-def dfs_loop_rev(graph, max):
-    for i in range(max, 0, -1):
-        if not explored[i]:
-            dfs_rev(graph, i)
+def kosajaru(graph):
+    max_v = max_node(graph)
+    graph = normalize(graph)
+    reversed = get_reversed_graph(graph, max_v)
+    exec_1 = Execution(max_v)
+    dfs_loop_rev(reversed, exec_1)
+    exec_2 = exec_1.init_from(exec_1)
+    dfs_loop(graph, exec_2)
+    return exec_2.leaders
 
 
-def dfs_loop(graph, max):
-    for i in sorted(f_time, key=lambda x: f_time[x], reverse=True):
-        if not explored[i]:
-            global s
-            s = i
-            dfs(graph, i)
+def dfs_loop_rev(graph, execution):
+    for i in range(execution.max_v, 0, -1):
+        if not execution.explored[i]:
+            dfs_rev(graph, i, execution)
 
 
-def dfs(graph, vertex):
-    explored[vertex] = True
-    leaders[vertex] = s
+def dfs_loop(graph, execution):
+    for i in sorted(execution.f_time, key=lambda x: execution.f_time[x], reverse=True):
+        if not execution.explored[i]:
+            execution.s = i
+            dfs(graph, i, execution)
+
+
+def dfs(graph, vertex, execution):
+    execution.explored[vertex] = True
+    execution.leaders[vertex] = execution.s
     for connection in list(graph[vertex]):
-        if not explored[connection]:
-            dfs(graph, connection)
+        if not execution.explored[connection]:
+            dfs(graph, connection, execution)
 
 
-def dfs_rev(graph, vertex):
-    global t
-    explored[vertex] = True
+def dfs_rev(graph, vertex, execution):
+    execution.explored[vertex] = True
     for connection in list(graph[vertex]):
-        if not explored[connection]:
-            dfs_rev(graph, connection)
-    t += 1
-    f_time[vertex] = t
+        if not execution.explored[connection]:
+            dfs_rev(graph, connection, execution)
+    execution.t += 1
+    execution.f_time[vertex] = execution.t
 
 
-def frequency_map(a, top):
-    freq = Counter(a)
-    return dict(sorted(freq.items(), key=lambda x: x[1], reverse=True)[:top])
+def get_reversed_graph(graph, max):
+    reversed = {}
+    for u in graph:
+        for v in graph[u]:
+            if v not in reversed:
+                reversed[v] = []
+            reversed[v].append(u)
+    for i in range(1, max + 1):
+        if i not in reversed:
+            reversed[i] = []
+    return reversed
 
 
 def init():
     with open('files/scc.txt', 'r') as file:
-        max = -1
         graph = defaultdict(list)
-        rev_graph = defaultdict(list)
         for line in file:
             key, value = map(int, line.split())
             graph[key].append(value)
-            rev_graph[value].append(key)
-            if key > max:
-                max = key
-        g1 = dict(graph)
-        g2 = dict(rev_graph)
-        for i in range(1, max+1):
-            if i not in g1:
-                g1[i] = []
-            if i not in g2:
-                g2[i] = []
-        return g1, g2, max
+        return graph
 
-sys.setrecursionlimit(10**6)
-kosajaru()
 
+def normalize(graph):
+    max_v = max_node(graph)
+    for i in range(1, max_v + 1):
+        if i not in graph:
+            graph[i] = []
+    return graph
+
+def max_node(graph):
+    max = 0
+    for u in graph:
+        if u > max:
+            max = u
+        for v in graph[u]:
+            if v > max:
+                max = v
+    return max
+
+# sys.setrecursionlimit(10**6)
+# graph = init()
+# leaders = kosajaru(graph)
+# freq = Counter(leaders)
+# print(dict(sorted(freq.items(), key=lambda x: x[1], reverse=True)[:10]))
