@@ -1,10 +1,11 @@
 # presorted
 import math
 import sys
+import time
 
 
 def closest_pair(p_x, p_y):
-    if len(p_x) == 1 or len(p_y) == 1:
+    if len(p_x) < 3 or len(p_y) < 3:
         return best_pair(p_x, p_y)
     x_half = len(p_x) // 2
     x_mid = p_x[x_half][1]  # x-coordinate of middle point
@@ -70,4 +71,7 @@ def init():
 
 sys.setrecursionlimit(10**6)
 x, y = init()
+t1 = time.time_ns()
 print(closest_pair(x, y))
+t2 = time.time_ns()
+print(t2-t1)
