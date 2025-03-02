@@ -1,3 +1,51 @@
+import sys
+from typing import List
+
+
+class Labeler:
+    def __init__(self, root):
+        self.root = root
+        self.index = 1
+
+    def label(self):
+        self._label(self.root)
+
+    def _label(self, node):
+        node.key = self.index
+        self.index += 1
+        if node.left is not None:
+            self._label(node.left)
+        if node.right is not None:
+            self._label(node.right)
+
+
+class Printer:
+    def __init__(self, root):
+        self.root = root
+
+    def bracket_form(self):
+        return self._bracket(self.root)
+
+    def genealogical_form(self):
+        root_array = [0]
+        return self._genealogical(self.root, root_array)
+
+    def _genealogical(self, node, array):
+        if node.parent is not None:
+            array.append(node.parent.key)
+        if node.left is not None:
+            self._genealogical(node.left, array)
+        if node.right is not None:
+            self._genealogical(node.right, array)
+        return array
+
+    def _bracket(self, node):
+        if node.left is None and node.right is None:
+            return '()'
+        result = '(' + self._bracket(node.left) + self._bracket(node.right) + ')'
+        return result
+
+
 class Node:
     def __init__(self, level):
         self.parent = None
@@ -16,101 +64,40 @@ class Node:
         other.parent = parent
         return parent
 
-    def display(self):
-        lines, *_ = self._display_aux()
-        for line in lines:
-            print(line)
-
-    def _display_aux(self):
-        if self.right is None and self.left is None:
-            line = '%s' % self.key
-            width = len(line)
-            height = 1
-            middle = width // 2
-            return [line], width, height, middle
-
-        if self.right is None:
-            lines, n, p, x = self.left._display_aux()
-            s = '%s' % self.key
-            u = len(s)
-            first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
-            second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
-            shifted_lines = [line + u * ' ' for line in lines]
-            return [first_line, second_line] + shifted_lines, n + u, p + 2, n + u // 2
-
-        if self.left is None:
-            lines, n, p, x = self.right._display_aux()
-            s = '%s' % self.key
-            u = len(s)
-            first_line = s + x * '_' + (n - x) * ' '
-            second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
-            shifted_lines = [u * ' ' + line for line in lines]
-            return [first_line, second_line] + shifted_lines, n + u, p + 2, u // 2
-
-        left, n, p, x = self.left._display_aux()
-        right, m, q, y = self.right._display_aux()
-        s = '%s' % self.key
-        u = len(s)
-        first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
-        second_line = x * ' ' + '/' + (n - x - 1 + u + y) * ' ' + '\\' + (m - y - 1) * ' '
-        if p < q:
-            left += [n * ' '] * (q - p)
-        elif q < p:
-            right += [m * ' '] * (p - q)
-        zipped_lines = zip(left, right)
-        lines = [first_line, second_line] + [a + u * ' ' + b for a, b in zipped_lines]
-        return lines, n + m + u, max(p, q) + 2, n + u // 2
 
 def init():
-    n_items = input()
-    levels = [int(item) for item in input().strip().split()]
-    return n_items, levels
+    input()
+    return [int(item) for item in input().strip().split()]
 
 
-def transform_into_tree(levels):
+def transform_into_tree(levels: List):
     if len(levels) == 1 and levels[0] == 0:
         return Node(0)
-    stack = []
-    start = Node(levels[0])
-    stack.append(start)
-    i = 1
-    while i < len(levels):
-        next = Node(levels[i])
-        if next.level == stack[-1].level:
-            stack[-1] = stack[-1].join(next)
-        else:
-            stack.append(next)
-        i += 1
-    if len(stack) == 1 and stack[0].level == 0:
-        return stack[0]
-    j = 1
-    while j < len(stack) and len(stack) > 1:
-        if stack[j].level == stack[j-1].level:
-            parent = stack[j-1].join(stack[j])
-            stack = stack[:j-1] + [parent] + stack[j+1:]
-            j = 1
-        else:
-            j += 1
-    if len(stack) == 1 and stack[0].level == 0:
-        return stack[0]
+
+    nodes = [Node(level) for level in levels]
+    max_level = max(levels)
+    curr_level = max(levels)
+    for i in range(max_level, 0, -1):
+        for j in range(len(nodes) - 1):
+            if j < len(nodes) - 1:
+                if nodes[j].level == curr_level and nodes[j + 1].level == curr_level:
+                    parent = nodes[j].join(nodes[j + 1])
+                    nodes = nodes[:j] + [parent] + nodes[j + 2:]
+        curr_level -= 1
+
+    if len(nodes) == 1 and nodes[0].level == 0:
+        return nodes[0]
     return None
 
 
-i = 1
-def label_nodes(root):
-    global i
-    root.key = i
-    i += 1
-    if root.left is not None:
-        label_nodes(root.left)
-    if root.right is not None:
-        label_nodes(root.right)
-
-
-levels = [3,3,2,3,3,3]
+levels = init()
 tree = transform_into_tree(levels)
 if tree is None:
-    print('none')
+    sys.stdout.write('NIE')
 else:
-    label_nodes(tree)
-    tree.display()
+    Labeler(tree).label()
+    printer = Printer(tree)
+    genealogical = printer.genealogical_form()
+    sys.stdout.write(' '.join(str(i) for i in genealogical))
+    sys.stdout.write('\n')
+    sys.stdout.write(printer.bracket_form())
