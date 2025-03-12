@@ -19,3 +19,6 @@ def _build_graph():
 
 g = _build_graph()
 print(bellman_ford_shortest_path.shortest_path(g))
+
+# todo: use Bellman-Ford (with backtracking) to find minimum-cost journey (journey time ties resolvable)
+# todo: use BFS with max-depth parameter to find minimum-time journey (journey cost ties resolvable)
