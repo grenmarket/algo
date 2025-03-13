@@ -1,30 +1,32 @@
 import sys
+import heapq
 
 
 def init():
     n = int(input())
     counts = []
     for i in range(n):
-        counts.append((i+1, int(input())))
+        # heapq only supports min
+        counts.append((-int(input()), i + 1))
     return counts
 
+
 def solve(counts):
-    sorted_counts = sorted(counts, key=lambda c: c[1], reverse=True)
-    remaining_capacity = [0 for _ in range(len(counts) + 1)]
-    for count in sorted_counts:
-        remaining_capacity[count[0]] = count[1]
     connections = []
-    for i in range(len(sorted_counts)):
-        curr_city = sorted_counts[i][0]
-        index = i+1
-        while remaining_capacity[curr_city] > 0:
-            next_city = sorted_counts[index][0]
-            if remaining_capacity[next_city] > 0:
-                connections.append((curr_city, next_city))
-                remaining_capacity[curr_city] -= 1
-                remaining_capacity[next_city] -= 1
-            index += 1
+    heap = counts.copy()
+    heapq.heapify(heap)
+    while len(heap) > 1:
+        this_iteration = []
+        current = heapq.heappop(heap)
+        for _ in range(-current[0]):
+            next = heapq.heappop(heap)
+            connections.append((current[1], next[1]))
+            if -next[0] > 1:
+                this_iteration.append((next[0]+1, next[1]))
+        for item in this_iteration:
+            heapq.heappush(heap, item)
     return connections
+
 
 c = init()
 solution = solve(c)
